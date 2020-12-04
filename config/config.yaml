@@ -1,0 +1,17 @@
+server:
+  addr: 0.0.0.0:80
+  locale: zh
+redis:
+  addr: 127.0.0.1:6379
+log:
+  level: info
+  development: false
+  httpServer:
+    open: true
+    addr: 0.0.0.0:9000
+  outputPaths:
+    #    - "log.log"
+    - "stdout"
+  errorOutputPaths:
+    #    - "err.log"
+    - "stdout"
