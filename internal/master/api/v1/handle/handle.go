@@ -23,11 +23,13 @@ func (Handle) AddLink(ctx *gin.Context) {
 		httpError.HandleBadRequest(ctx, validator.GetMsg(err))
 		return
 	}
-	if err := server.AddUrl(link); err != nil {
+	if key, err := server.AddUrl(link); err != nil {
 		log.Error(err.Error())
 		R.Error(ctx, "error", nil)
 	} else {
-		R.Ok(ctx, "", nil)
+		R.Ok(ctx, "", gin.H{
+			"key": key,
+		})
 	}
 	return
 }

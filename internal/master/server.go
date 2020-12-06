@@ -2,14 +2,17 @@ package master
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"shortLink/internal/master/api/v1/registry"
 	"shortLink/internal/master/config"
 	"shortLink/internal/master/model"
 	myValidator "shortLink/internal/master/validator"
+	"shortLink/pkg/client/database"
 	"shortLink/pkg/client/redis"
 	"shortLink/pkg/log"
+	string_plus "shortLink/pkg/string"
 	"shortLink/pkg/validator"
 )
 
@@ -22,10 +25,12 @@ type Server struct {
 func (s *Server) PrepareRun(stopCh <-chan struct{}) (err error) {
 	s.initCfg()
 	s.initLog()
+	s.initDB(stopCh)
 	s.initRedis(stopCh)
 	s.initHttpServer()
 	s.initRouter()
 	s.initValidator()
+	s.initRandStr()
 	return s.err
 }
 
@@ -83,4 +88,36 @@ func (s *Server) initValidator() {
 		return
 	}
 	s.err = validator.Init(s.Config.Server.Locale, myValidator.RegisterValidation)
+}
+
+func (s *Server) initDB(stopCh <-chan struct{}) {
+	if s.err != nil {
+		return
+	}
+	var c *database.Client
+	log.Info(fmt.Sprintf("db init"))
+	c, s.err = database.NewDatabaseClient(s.Config.DB, stopCh)
+	log.Info(fmt.Sprintf("db init over"))
+	model.MainDB = c.DB()
+	s.initMigrate()
+}
+
+func (s *Server) initMigrate() {
+	if s.err != nil {
+		return
+	}
+	if model.MainDB != nil {
+		model.MainDB.AutoMigrate(
+			new(model.Urls),
+		)
+	} else {
+		s.err = errors.New("db not init")
+	}
+}
+
+func (s *Server) initRandStr() {
+	if s.err != nil {
+		return
+	}
+	string_plus.New()
 }

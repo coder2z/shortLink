@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/spf13/viper"
 	"shortLink/internal/master/config/server"
+	"shortLink/pkg/client/database"
 	"shortLink/pkg/client/redis"
 	"shortLink/pkg/log"
 )
@@ -20,6 +21,7 @@ type Cfg struct {
 	Server *server.Options
 	Log    *log.Options
 	Redis  *redis.Options
+	DB     *database.Options
 }
 
 func cfg() *Cfg {
@@ -27,6 +29,7 @@ func cfg() *Cfg {
 		Server: server.NewServerOptions(),
 		Log:    log.NewLogOptions(),
 		Redis:  redis.NewRedisOptions(),
+		DB:     database.NewDatabaseOptions(),
 	}
 }
 
